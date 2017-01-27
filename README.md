@@ -33,19 +33,19 @@ valid <- data3[-inTrain,]
 ```
 ## Train with random forest
 
-# parallel clusters
+## parallel clusters
 ```require(parallel)
 require(doParallel)
 cl <- makeCluster(detectCores() - 1)
 registerDoParallel(cl)
 ```
-# control parameters
+## control parameters
 ```
 ctrl <- trainControl(classProbs=TRUE,
                      savePredictions=TRUE,
                      allowParallel=TRUE)
 ```
-# fir model and stop
+## fit model and stop
 ```
 method <- "rf"
 system.time(trainingModel <- train(classe ~ ., data=DTrainCS, method=method))
@@ -69,3 +69,6 @@ hat <- predict(trainingModel, DTestCS)
 DTest <- cbind(hat , DTest)
 subset(DTest, select=names(DTest)[grep("belt|[^(fore)]arm|dumbbell|forearm", names(DTest), invert=TRUE)])
 ```
+
+## Summary
+Random forest gives the most ideal prediction results. The Confusion matrix achieved 99.6% accuracy. The re-sampling and cross function concept of random forest helps dealing with large data set.
