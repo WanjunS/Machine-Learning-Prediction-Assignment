@@ -17,6 +17,20 @@ if (!file.exists(testFile)) {
   download.file(testUrl, destfile=testFile)
 }
 ```
+
+```
+trainingDataSet <- trainingDataSet[,(colSums(is.na(trainingDataSet)) == 0)]
+dim(trainingDataSet)
+```
+##### [1] 19622    60
+```
+testingDataSet <- testingDataSet[,(colSums(is.na(testingDataSet)) == 0)]
+dim(testingDataSet)
+```
+##### [1] 20 60
+##### Now I get a good understanding of how large the dataset is: training 19622, testing 20, variables 60 for both.
+
+
 ## Data Cleansing
 ```
 isAnyMissing <- sapply(DTest, function (x) any(is.na(x) | x == ""))
@@ -24,6 +38,8 @@ isPredictor <- !isAnyMissing & grepl("belt|[^(fore)]arm|dumbbell|forearm", names
 predCandidates <- names(isAnyMissing)[isPredictor]
 predCandidates
 ```
+##### Run the dim again, data size remains unchange. 
+
 ## Classe
 ```
 set.seed(1)
@@ -31,6 +47,8 @@ inTrain <- createDataPartition(y=data3$classe, p=0.60, list=FALSE)
 training <- data3[inTrain,]
 valid <- data3[-inTrain,]
 ```
+##### Further partition the data into 60% training /40% validation.
+
 ## Train with random forest
 
 ## parallel clusters
@@ -51,7 +69,16 @@ method <- "rf"
 system.time(trainingModel <- train(classe ~ ., data=DTrainCS, method=method))
 stopCluster(cl)
 ```
-## Apply to both datasets
+##### Resampling: Cross-Validated (10 fold) 
+##### Summary of sample sizes: 13245, 13248, 13245, 13245, 13245, 13247, ... 
+##### Resampling results across tuning parameters:
+##### 
+#####   mtry  Accuracy   Kappa    
+#####    2    0.9929331  0.9910609
+#####   14    0.9925931  0.9906307
+#####   27    0.9893992  0.9865911
+
+##### mtry=2 gives the highest accuracy, chosen for final model.
 ```
 trainingModel
 hat <- predict(trainingModel, DTrainCS)
@@ -60,14 +87,33 @@ hat <- predict(trainingModel, DProbeCS)
 confusionMatrix(hat, DProbeCS[, classe])
 save(trainingModel, file="trainingModel.RData")
 ```
+##### confusion matrix shows the same conclusion.
 
-## Prediction
+## Cross Validation
 ```
-load(file="trainingModel.RData", verbose=TRUE)
-DTestCS <- predict(preProc, DTest[, predCandidates, with=FALSE])
-hat <- predict(trainingModel, DTestCS)
-DTest <- cbind(hat , DTest)
-subset(DTest, select=names(DTest)[grep("belt|[^(fore)]arm|dumbbell|forearm", names(DTest), invert=TRUE)])
+predValidRF <- predict(modFitrf, validation)
+confus <- confusionMatrix(validation$classe, predValidRF)
+confus$table
+```
+
+```
+out_of_sample_error <- 1 - modAccuracy
+out_of_sample_error
+```
+##### [1] 0.003465658
+##### out of sample error rate is very low across 5 validation classes.
+```
+accur <- postResample(validation$classe, predValidRF)
+modAccuracy <- accur[[1]]
+modAccuracy
+```
+##### [1] 0.9956634
+##### The model achieved 99.6% accuracy.
+
+## Predicting&Testing
+```
+pred_final <- predict(modFitrf, pre_testingDataSet)
+pred_final
 ```
 
 ## Summary
