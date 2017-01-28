@@ -70,14 +70,14 @@ system.time(trainingModel <- train(classe ~ ., data=DTrainCS, method=method))
 stopCluster(cl)
 ```
 ```
-##### Resampling: Cross-Validated (10 fold) 
-##### Summary of sample sizes: 13245, 13248, 13245, 13245, 13245, 13247, ... 
-##### Resampling results across tuning parameters:
-##### 
-#####   mtry  Accuracy   Kappa    
-#####    2    0.9929331  0.9910609
-#####   14    0.9925931  0.9906307
-#####   27    0.9893992  0.9865911
+Resampling: Cross-Validated (10 fold) 
+Summary of sample sizes: 13245, 13248, 13245, 13245, 13245, 13247, ... 
+Resampling results across tuning parameters:
+
+mtry  Accuracy   Kappa    
+2    0.9929331  0.9910609
+14    0.9925931  0.9906307
+27    0.9893992  0.9865911
 ```
 ##### mtry=2 gives the highest accuracy, chosen for final model.
 ```
